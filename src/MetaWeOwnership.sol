@@ -14,10 +14,11 @@ contract MetaWeOwnership is ERC721, ERC721Enumerable, Ownable {
 
   constructor(address _owner) ERC721("MetaWe Ownership", "MWO") Ownable(_owner) { }
 
-  /**
-   * Public functions
-   */
-  function mint(address _to, string calldata _identifier) public onlyOwner returns (uint256) {
+  /*//////////////////////////////////////////////////////////////
+                          EXTERNAL FUNCTIONS
+  //////////////////////////////////////////////////////////////*/
+
+  function mint(address _to, string calldata _identifier) external onlyOwner returns (uint256) {
     if (s_identifierToTokenId[_identifier] != 0) {
       revert MetaWeOwnership__IdentifierAlreadyExists(_identifier);
     }
@@ -28,13 +29,22 @@ contract MetaWeOwnership is ERC721, ERC721Enumerable, Ownable {
     return tokenId;
   }
 
+  /*//////////////////////////////////////////////////////////////
+                            VIEW FUNCTIONS
+  //////////////////////////////////////////////////////////////*/
+
   function nextTokenId() public view returns (uint256) {
     return totalSupply() + 1;
   }
 
-  /**
-   * Internal functions
-   */
+  function getTokenIdByIdentifier(string calldata _identifier) external view returns (uint256) {
+    return s_identifierToTokenId[_identifier];
+  }
+
+  /*//////////////////////////////////////////////////////////////
+                          INTERNAL FUNCTIONS
+  //////////////////////////////////////////////////////////////*/
+
   function _update(
     address to,
     uint256 tokenId,
