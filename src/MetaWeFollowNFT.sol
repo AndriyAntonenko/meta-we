@@ -3,16 +3,18 @@ pragma solidity ^0.8.20;
 
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { ERC721Enumerable } from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import { ERC721Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import { HubRestricted } from "./base/HubRestricted.sol";
 
 import { MetaWeAccount } from "./MetaWeAccount.sol";
 import { MetaWeOwnership } from "./MetaWeOwnership.sol";
 import { IFollowNFT } from "./interfaces/IFollowNFT.sol";
 
-contract MetaWeFollowNFT is ERC721, HubRestricted, IFollowNFT {
+contract MetaWeFollowNFT is ERC721Upgradeable, HubRestricted, IFollowNFT {
   string public constant NAME_PREFIX = "MetaWe-Follow-NFT-";
-  string public constant SYMBOL = "MWFNFT-";
-  address private immutable i_followee;
+  string public constant SYMBOL_PREFIX = "MWF-";
+
+  address private i_followee;
 
   /*//////////////////////////////////////////////////////////////
                               STORAGE
@@ -21,13 +23,9 @@ contract MetaWeFollowNFT is ERC721, HubRestricted, IFollowNFT {
   mapping(address => uint256) private s_followersIndexes;
   FollowingInfo[] private s_followers;
 
-  constructor(
-    address _followee,
-    address _hub
-  )
-    HubRestricted(_hub)
-    ERC721(string(abi.encodePacked(NAME_PREFIX, _followee)), string(abi.encodePacked(SYMBOL, _followee)))
-  {
+  function initialize(address _followee, address _hub, string memory _nickname) external initializer {
+    __HubRestricted_init(_hub);
+    __ERC721_init(string(abi.encodePacked(NAME_PREFIX, _nickname)), string(abi.encodePacked(SYMBOL_PREFIX, _nickname)));
     i_followee = _followee;
   }
 

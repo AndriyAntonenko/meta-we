@@ -10,6 +10,7 @@ contract MetaWeFollowNFTTest is Test {
   event Follow(address indexed follower, uint256 tokenId, uint256 timestamp);
   event Unfollow(address indexed follower, uint256 tokenId, uint256 timestamp);
 
+  string public constant nickname = "nickname";
   address public immutable hub = makeAddr("hub");
   address public immutable folowee = makeAddr("followee");
   address public immutable follower = makeAddr("follower");
@@ -17,7 +18,8 @@ contract MetaWeFollowNFTTest is Test {
   MetaWeFollowNFT public followNFT;
 
   function setUp() public {
-    followNFT = new MetaWeFollowNFT(folowee, hub);
+    followNFT = new MetaWeFollowNFT();
+    followNFT.initialize(folowee, hub, nickname);
   }
 
   function test_follow() public {
@@ -28,9 +30,9 @@ contract MetaWeFollowNFTTest is Test {
   }
 
   function test_followEmitFollowEvent() public {
-    vm.prank(hub);
     vm.expectEmit();
     emit Follow(follower, followNFT.nextTokenId(), block.timestamp);
+    vm.prank(hub);
     followNFT.follow(follower);
   }
 
@@ -61,11 +63,11 @@ contract MetaWeFollowNFTTest is Test {
   }
 
   function test_nameIsCorrect() public {
-    assertEq(followNFT.name(), string(abi.encodePacked("MetaWe-Follow-NFT-", folowee)));
+    assertEq(followNFT.name(), string(abi.encodePacked("MetaWe-Follow-NFT-", nickname)));
   }
 
   function test_symbolIsCorrect() public {
-    assertEq(followNFT.symbol(), string(abi.encodePacked("MWFNFT-", folowee)));
+    assertEq(followNFT.symbol(), string(abi.encodePacked("MWF-", nickname)));
   }
 
   function test_unfollow() public {
@@ -107,6 +109,7 @@ contract MetaWeFollowNFTTest is Test {
     followNFT.unfollow(follower);
 
     vm.expectRevert(abi.encodeWithSelector(IFollowNFT.FollowNFT__NotFollowing.selector, follower));
+    vm.prank(hub);
     followNFT.unfollow(follower);
   }
 }

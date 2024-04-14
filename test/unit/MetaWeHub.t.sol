@@ -10,6 +10,7 @@ import { MetaWeFollowNFT } from "../../src/MetaWeFollowNFT.sol";
 import { MetaWeAccount } from "../../src/MetaWeAccount.sol";
 import { MetaWeRegistry } from "../../src/MetaWeRegistry.sol";
 import { MetaWeOwnership } from "../../src/MetaWeOwnership.sol";
+import { MetaWeFollowNFT } from "../../src/MetaWeFollowNFT.sol";
 
 contract MetaWeHubTest is Test {
   MetaWeHub public hub;
@@ -17,14 +18,15 @@ contract MetaWeHubTest is Test {
   address public followee = makeAddr("followee");
 
   function setUp() public {
-    address _accountImpl = address(new MetaWeAccount());
-    address _registry = address(new MetaWeRegistry(address(this)));
-    address _ownership = address(new MetaWeOwnership(address(this)));
+    address accountImpl = address(new MetaWeAccount());
+    address registry = address(new MetaWeRegistry(address(this)));
+    address ownership = address(new MetaWeOwnership(address(this)));
+    address followNftImpl = address(new MetaWeFollowNFT());
 
-    hub = new MetaWeHub(_accountImpl, _registry, _ownership);
+    hub = new MetaWeHub(accountImpl, registry, ownership, followNftImpl);
 
-    MetaWeRegistry(_registry).transferOwnership(address(hub));
-    MetaWeOwnership(_ownership).transferOwnership(address(hub));
+    MetaWeRegistry(registry).transferOwnership(address(hub));
+    MetaWeOwnership(ownership).transferOwnership(address(hub));
   }
 
   function test_createAccount() public {
