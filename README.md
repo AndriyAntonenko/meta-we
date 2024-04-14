@@ -6,4 +6,9 @@
 
 ### Initial architecture scheme
 
-![initial-architecture.png](docs/initial-architecture.png)
+![initial-architecture.png](docs/architecture.png)
+
+### Features implemented
+
+1. Account creation (minting ownership and deploy of the ERC-6551 account)
+2. Following mechanism (using ERC721 contract for every specific account, where minting equal following to special account).
