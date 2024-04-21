@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { ERC721Enumerable } from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import { IERC721Metadata } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import { Base64 } from "@openzeppelin/contracts/utils/Base64.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MetaWeOwnership is ERC721, ERC721Enumerable, Ownable {
@@ -15,14 +14,29 @@ contract MetaWeOwnership is ERC721, ERC721Enumerable, Ownable {
   constructor(address _owner) ERC721("MetaWe Ownership", "MWO") Ownable(_owner) { }
 
   /*//////////////////////////////////////////////////////////////
-                          EXTERNAL FUNCTIONS
+                              MODIFIERS
   //////////////////////////////////////////////////////////////*/
 
-  function mint(address _to, string calldata _identifier) external onlyOwner returns (uint256) {
+  modifier identifierNotExists(string calldata _identifier) {
     if (s_identifierToTokenId[_identifier] != 0) {
       revert MetaWeOwnership__IdentifierAlreadyExists(_identifier);
     }
+    _;
+  }
 
+  /*//////////////////////////////////////////////////////////////
+                          EXTERNAL FUNCTIONS
+  //////////////////////////////////////////////////////////////*/
+
+  function mint(
+    address _to,
+    string calldata _identifier
+  )
+    external
+    onlyOwner
+    identifierNotExists(_identifier)
+    returns (uint256)
+  {
     uint256 tokenId = nextTokenId(); // Token ID starts from 1
     s_identifierToTokenId[_identifier] = tokenId;
     _safeMint(_to, tokenId);

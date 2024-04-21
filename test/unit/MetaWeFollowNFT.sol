@@ -2,9 +2,9 @@
 pragma solidity ^0.8.20;
 
 import { Test } from "forge-std/Test.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { MetaWeFollowNFT } from "../../src/MetaWeFollowNFT.sol";
 import { IFollowNFT } from "../../src/interfaces/IFollowNFT.sol";
-import { HubRestricted } from "../../src/base/HubRestricted.sol";
 
 contract MetaWeFollowNFTTest is Test {
   event Follow(address indexed follower, uint256 tokenId, uint256 timestamp);
@@ -30,15 +30,16 @@ contract MetaWeFollowNFTTest is Test {
   }
 
   function test_followEmitFollowEvent() public {
-    vm.expectEmit();
+    vm.expectEmit(true, true, true, false);
     emit Follow(follower, followNFT.nextTokenId(), block.timestamp);
     vm.prank(hub);
     followNFT.follow(follower);
   }
 
   function test_followWithoutHubReverts() public {
-    vm.prank(makeAddr("random"));
-    vm.expectRevert(HubRestricted.HubRestricted__NotHub.selector);
+    address randomAddress = makeAddr("random");
+    vm.prank(randomAddress);
+    vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, randomAddress));
     followNFT.follow(follower);
   }
 
@@ -87,7 +88,7 @@ contract MetaWeFollowNFTTest is Test {
     followNFT.follow(follower);
 
     vm.prank(hub);
-    vm.expectEmit();
+    vm.expectEmit(true, true, true, false);
     emit Unfollow(follower, tokenId, block.timestamp);
     followNFT.unfollow(follower);
   }
@@ -96,8 +97,9 @@ contract MetaWeFollowNFTTest is Test {
     vm.prank(hub);
     followNFT.follow(follower);
 
-    vm.prank(makeAddr("random"));
-    vm.expectRevert(abi.encodeWithSelector(HubRestricted.HubRestricted__NotHub.selector));
+    address randomAddress = makeAddr("random");
+    vm.prank(randomAddress);
+    vm.expectRevert(abi.encodeWithSelector(OwnableUpgradeable.OwnableUnauthorizedAccount.selector, randomAddress));
     followNFT.unfollow(follower);
   }
 

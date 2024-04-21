@@ -4,13 +4,13 @@ pragma solidity ^0.8.20;
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { ERC721Enumerable } from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import { ERC721Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import { HubRestricted } from "./base/HubRestricted.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import { MetaWeAccount } from "./MetaWeAccount.sol";
 import { MetaWeOwnership } from "./MetaWeOwnership.sol";
 import { IFollowNFT } from "./interfaces/IFollowNFT.sol";
 
-contract MetaWeFollowNFT is ERC721Upgradeable, HubRestricted, IFollowNFT {
+contract MetaWeFollowNFT is ERC721Upgradeable, OwnableUpgradeable, IFollowNFT {
   string public constant NAME_PREFIX = "MetaWe-Follow-NFT-";
   string public constant SYMBOL_PREFIX = "MWF-";
 
@@ -24,13 +24,13 @@ contract MetaWeFollowNFT is ERC721Upgradeable, HubRestricted, IFollowNFT {
   FollowingInfo[] private s_followers;
 
   function initialize(address _followee, address _hub, string memory _nickname) external initializer {
-    __HubRestricted_init(_hub);
+    __Ownable_init(_hub);
     __ERC721_init(string(abi.encodePacked(NAME_PREFIX, _nickname)), string(abi.encodePacked(SYMBOL_PREFIX, _nickname)));
     i_followee = _followee;
   }
 
   /*//////////////////////////////////////////////////////////////
-                                LOGIC
+                              MODIFIERS
   //////////////////////////////////////////////////////////////*/
 
   modifier notFollowed(address _follower) {
@@ -47,7 +47,11 @@ contract MetaWeFollowNFT is ERC721Upgradeable, HubRestricted, IFollowNFT {
     _;
   }
 
-  function follow(address _follower) external onlyHub notFollowed(_follower) {
+  /*//////////////////////////////////////////////////////////////
+                                LOGIC
+  //////////////////////////////////////////////////////////////*/
+
+  function follow(address _follower) external onlyOwner notFollowed(_follower) {
     uint256 tokenId = nextTokenId();
     _mint(_follower, tokenId);
 
@@ -60,7 +64,7 @@ contract MetaWeFollowNFT is ERC721Upgradeable, HubRestricted, IFollowNFT {
     emit Follow(_follower, tokenId, block.timestamp);
   }
 
-  function unfollow(address _follower) external onlyHub onlyFollower(_follower) {
+  function unfollow(address _follower) external onlyOwner onlyFollower(_follower) {
     uint256 tokenId = s_tokenIdByFollower[_follower];
     _burn(tokenId);
 
