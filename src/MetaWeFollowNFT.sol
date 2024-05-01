@@ -10,6 +10,9 @@ import { MetaWeAccount } from "./MetaWeAccount.sol";
 import { MetaWeOwnership } from "./MetaWeOwnership.sol";
 import { IFollowNFT } from "./interfaces/IFollowNFT.sol";
 
+/// @title MetaWeFollowNFT
+/// @notice NFT for following to followee.
+/// @author Andrii Antonenko <andriyantonenko3.16@gmail.com>
 contract MetaWeFollowNFT is ERC721Upgradeable, OwnableUpgradeable, IFollowNFT {
   string public constant NAME_PREFIX = "MetaWe-Follow-NFT-";
   string public constant SYMBOL_PREFIX = "MWF-";
@@ -51,6 +54,8 @@ contract MetaWeFollowNFT is ERC721Upgradeable, OwnableUpgradeable, IFollowNFT {
                                 LOGIC
   //////////////////////////////////////////////////////////////*/
 
+  /// @dev Mint NFT for follower to follow followee.
+  /// @param _follower Follower address
   function follow(address _follower) external onlyOwner notFollowed(_follower) {
     uint256 tokenId = nextTokenId();
     _mint(_follower, tokenId);
@@ -64,6 +69,8 @@ contract MetaWeFollowNFT is ERC721Upgradeable, OwnableUpgradeable, IFollowNFT {
     emit Follow(_follower, tokenId, block.timestamp);
   }
 
+  /// @dev Burn NFT for follower to unfollow followee.
+  /// @param _follower Follower address
   function unfollow(address _follower) external onlyOwner onlyFollower(_follower) {
     uint256 tokenId = s_tokenIdByFollower[_follower];
     _burn(tokenId);
@@ -86,18 +93,22 @@ contract MetaWeFollowNFT is ERC721Upgradeable, OwnableUpgradeable, IFollowNFT {
                             VIEW FUNCTIONS
   //////////////////////////////////////////////////////////////*/
 
+  /// @dev Return the next ERC721 token ID for follower.
   function nextTokenId() public view returns (uint256) {
     return s_followers.length + 1;
   }
 
+  /// @dev Return the ERC721 token ID for follower.
   function getTokenIdByFollower(address _follower) external view returns (uint256) {
     return s_tokenIdByFollower[_follower];
   }
 
+  /// @dev Return the address of the contract followee.
   function followee() external view returns (address) {
     return i_followee;
   }
 
+  /// @dev Return the list of followers for followee.
   function getFollowersList() external view returns (FollowingInfo[] memory) {
     return s_followers;
   }

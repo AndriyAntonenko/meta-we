@@ -28,6 +28,11 @@ contract MetaWeOwnership is ERC721, ERC721Enumerable, Ownable {
                           EXTERNAL FUNCTIONS
   //////////////////////////////////////////////////////////////*/
 
+  /// @notice mint a new ownership token to `_to` with identifier `_identifier`
+  /// @dev this token will be used to control the ERC-6551 account
+  /// @param _to the address to mint the token to
+  /// @param _identifier the identifier of the token
+  /// @return the token ID
   function mint(
     address _to,
     string calldata _identifier

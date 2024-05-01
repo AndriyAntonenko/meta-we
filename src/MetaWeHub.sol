@@ -26,6 +26,11 @@ contract MetaWeHub is AccountsStorage {
     i_ownership = MetaWeOwnership(_ownership);
   }
 
+  /// @dev Create an account for caller (mint ownership and create account in registry). Also create follow NFT for
+  /// account.
+  /// @param nickname Account nickname
+  /// @return tokenId Account token ID
+  /// @return account Account address
   function createAccount(string calldata nickname) external returns (uint256 tokenId, address account) {
     bytes32 salt = keccak256(abi.encodePacked(nickname));
     tokenId = i_ownership.mint(msg.sender, nickname);
@@ -39,11 +44,15 @@ contract MetaWeHub is AccountsStorage {
     s_followNfts[account] = address(followNftProxy);
   }
 
+  /// @dev Follow to followee(mint follow NFT for caller in NFT associated with followee).
+  /// @param followee Followee address
   function follow(address followee) external onlyAccount(followee) onlyAccount(msg.sender) {
     MetaWeFollowNFT followNft = MetaWeFollowNFT(s_followNfts[followee]);
     followNft.follow(msg.sender);
   }
 
+  /// @dev Unfollow from followee(burn follow NFT for caller in NFT associated with followee).
+  /// @param followee Followee address
   function unfollow(address followee) external onlyAccount(followee) onlyAccount(msg.sender) {
     MetaWeFollowNFT followNft = MetaWeFollowNFT(s_followNfts[followee]);
     followNft.unfollow(msg.sender);
@@ -53,6 +62,10 @@ contract MetaWeHub is AccountsStorage {
                             VIEW FUNCTIONS
   //////////////////////////////////////////////////////////////*/
 
+  /// @dev Predict account address for nickname. Be aware that the addres depdends on the token ID too.
+  /// @param nickname Account nickname
+  /// @return tokenId Account token ID
+  /// @return account Account address
   function predictAccountAddress(string calldata nickname) external view returns (uint256 tokenId, address account) {
     bytes32 salt = keccak256(abi.encodePacked(nickname));
     tokenId = i_ownership.nextTokenId();
