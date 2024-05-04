@@ -64,6 +64,16 @@ contract MetaWeOwnership is ERC721, ERC721Enumerable, Ownable {
                           INTERNAL FUNCTIONS
   //////////////////////////////////////////////////////////////*/
 
+  /// @notice this function allows to receive all tokens for a specific owner
+  function getOwnedTokenIds(address _owner) external view onlyOwner returns (uint256[] memory) {
+    uint256 balance = balanceOf(_owner);
+    uint256[] memory tokenIds = new uint256[](balance);
+    for (uint256 i = 0; i < balance; i++) {
+      tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
+    }
+    return tokenIds;
+  }
+
   function _update(
     address to,
     uint256 tokenId,

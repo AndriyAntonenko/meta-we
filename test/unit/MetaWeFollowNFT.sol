@@ -82,6 +82,21 @@ contract MetaWeFollowNFTTest is Test {
     assertEq(followNFT.getTokenIdByFollower(follower), 0);
   }
 
+  function test_unfollowWhenIndexIsNotLast() public {
+    vm.prank(hub);
+    followNFT.follow(follower);
+
+    address anotherFollower = makeAddr("anotherFollower");
+    vm.prank(hub);
+    followNFT.follow(anotherFollower);
+
+    vm.prank(hub);
+    followNFT.unfollow(follower);
+
+    assertEq(followNFT.getFollowersList().length, 1);
+    assertEq(followNFT.getTokenIdByFollower(follower), 0);
+  }
+
   function test_unfollowEmitUnfollowEvent() public {
     uint256 tokenId = followNFT.nextTokenId();
     vm.prank(hub);

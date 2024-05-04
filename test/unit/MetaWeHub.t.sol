@@ -109,4 +109,22 @@ contract MetaWeHubTest is Test {
     assertEq(followers.length, 0);
     assertEq(MetaWeFollowNFT(hub.getFollowNftAddress(followeeAccount)).getTokenIdByFollower(userAccount), 0);
   }
+
+  function test_getOwnedAccounts() public {
+    string memory nickname1 = "nickname1";
+    string memory nickname2 = "nickname2";
+
+    vm.prank(user);
+    hub.createAccount(nickname1);
+
+    vm.prank(user);
+    hub.createAccount(nickname2);
+
+    address otherUser = makeAddr("otherUser");
+    vm.prank(otherUser);
+    hub.createAccount("otherUser");
+
+    AccountsStorage.Account[] memory accounts = hub.getOwnedAccounts(user);
+    assertEq(accounts.length, 2);
+  }
 }

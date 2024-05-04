@@ -9,8 +9,16 @@ contract AccountsStorage {
   error AccountsStorage__AccountAlreadyExists(address account);
   error AccountsStorage__AccountDoesNotExist(address account);
 
-  /// @dev Mapping of accounts addresses to boolean values.
-  mapping(address => bool) public accounts;
+  struct Account {
+    uint256 tokenId;
+    address account;
+  }
+
+  /// @dev Mapping of accounts addresses to tokenId.
+  mapping(address => uint256) internal accountToTokenId;
+
+  /// @dev Mapping of tokenId to account address.
+  mapping(uint256 => address) internal tokenIdToAccount;
 
   modifier onlyAccount(address account) {
     if (!isAccount(account)) revert AccountsStorage__AccountDoesNotExist(account);
@@ -20,13 +28,22 @@ contract AccountsStorage {
   /// @dev Check if account exists in storage.
   /// @param account Account address.
   function isAccount(address account) public view returns (bool) {
-    return accounts[account];
+    return accountToTokenId[account] != 0;
   }
 
   /// @dev Save account to storage.
   /// @param account Account address.
-  function saveAccount(address account) public {
-    if (accounts[account]) revert AccountsStorage__AccountAlreadyExists(account);
-    accounts[account] = true;
+  function saveAccount(address account, uint256 tokenId) public {
+    if (accountToTokenId[account] != 0) revert AccountsStorage__AccountAlreadyExists(account);
+    accountToTokenId[account] = tokenId;
+    tokenIdToAccount[tokenId] = account;
+  }
+
+  function getAccountTokenId(address account) external view returns (uint256) {
+    return accountToTokenId[account];
+  }
+
+  function getAccountByTokenId(uint256 tokenId) public view returns (address) {
+    return tokenIdToAccount[tokenId];
   }
 }

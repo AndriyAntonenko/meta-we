@@ -17,7 +17,7 @@ contract MetaWeHub is AccountsStorage {
 
   mapping(address => address) private s_followNfts;
 
-  event AccountCreated(address indexed account, uint256 indexed tokenId, string nickname);
+  event AccountCreated(address indexed account, uint256 indexed tokenId, address indexed owner, string nickname);
 
   constructor(address _accountImpl, address _registry, address _ownership, address _followNftImpl) {
     i_accountImpl = _accountImpl;
@@ -35,8 +35,8 @@ contract MetaWeHub is AccountsStorage {
     bytes32 salt = keccak256(abi.encodePacked(nickname));
     tokenId = i_ownership.mint(msg.sender, nickname);
     account = i_registry.createAccount(i_accountImpl, salt, block.chainid, address(i_ownership), tokenId);
-    saveAccount(account);
-    emit AccountCreated(account, tokenId, nickname);
+    saveAccount(account, tokenId);
+    emit AccountCreated(account, tokenId, msg.sender, nickname);
 
     ERC1967Proxy followNftProxy = new ERC1967Proxy(i_followNftImpl, "");
     MetaWeFollowNFT followNft = MetaWeFollowNFT(address(followNftProxy));
@@ -70,6 +70,15 @@ contract MetaWeHub is AccountsStorage {
     bytes32 salt = keccak256(abi.encodePacked(nickname));
     tokenId = i_ownership.nextTokenId();
     account = i_registry.account(i_accountImpl, salt, block.chainid, address(i_ownership), tokenId);
+  }
+
+  function getOwnedAccounts(address owner) external view returns (Account[] memory) {
+    uint256[] memory tokenIds = i_ownership.getOwnedTokenIds(owner);
+    Account[] memory accounts = new Account[](tokenIds.length);
+    for (uint256 i = 0; i < tokenIds.length; i++) {
+      accounts[i] = Account({ tokenId: tokenIds[i], account: tokenIdToAccount[tokenIds[i]] });
+    }
+    return accounts;
   }
 
   function getFollowNftAddress(address followee) public view returns (address) {

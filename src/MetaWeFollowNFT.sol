@@ -44,6 +44,7 @@ contract MetaWeFollowNFT is ERC721Upgradeable, OwnableUpgradeable, IFollowNFT {
   }
 
   modifier onlyFollower(address _follower) {
+    //slither-disable-next-line incorrect-equality
     if (s_tokenIdByFollower[_follower] == 0) {
       revert FollowNFT__NotFollowing(_follower);
     }
