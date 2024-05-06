@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import { Test } from "forge-std/Test.sol";
 
+import { Deploy } from "../../script/Deploy.s.sol";
 import { AccountsStorage } from "../../src/base/AccountsStorage.sol";
 import { IERC6551Executable } from "../../src/erc-6551/IERC6551Executable.sol";
 import { MetaWeHub } from "../../src/MetaWeHub.sol";
@@ -14,19 +15,13 @@ import { MetaWeFollowNFT } from "../../src/MetaWeFollowNFT.sol";
 
 contract MetaWeHubTest is Test {
   MetaWeHub public hub;
+  Deploy public deployer;
   address public user = makeAddr("user");
   address public followee = makeAddr("followee");
 
   function setUp() public {
-    address accountImpl = address(new MetaWeAccount());
-    address registry = address(new MetaWeRegistry(address(this)));
-    address ownership = address(new MetaWeOwnership(address(this)));
-    address followNftImpl = address(new MetaWeFollowNFT());
-
-    hub = new MetaWeHub(accountImpl, registry, ownership, followNftImpl);
-
-    MetaWeRegistry(registry).transferOwnership(address(hub));
-    MetaWeOwnership(ownership).transferOwnership(address(hub));
+    deployer = new Deploy();
+    (,,,, hub) = deployer.run();
   }
 
   function test_createAccount() public {

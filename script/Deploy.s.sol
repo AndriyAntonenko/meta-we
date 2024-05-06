@@ -4,6 +4,8 @@ pragma solidity ^0.8.20;
 import { Script } from "forge-std/Script.sol";
 import { VmSafe } from "forge-std/Vm.sol";
 
+import { NetworkConfig } from "./NetworkConfig.s.sol";
+
 import { MetaWeHub } from "../src/MetaWeHub.sol";
 import { MetaWeAccount } from "../src/MetaWeAccount.sol";
 import { MetaWeRegistry } from "../src/MetaWeRegistry.sol";
@@ -11,11 +13,11 @@ import { MetaWeOwnership } from "../src/MetaWeOwnership.sol";
 import { MetaWeFollowNFT } from "../src/MetaWeFollowNFT.sol";
 
 contract Deploy is Script {
-  function run() external {
-    uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-    vm.startBroadcast(deployerPrivateKey);
+  function run() external returns (MetaWeAccount, MetaWeFollowNFT, MetaWeRegistry, MetaWeOwnership, MetaWeHub) {
+    NetworkConfig networkConfig = new NetworkConfig();
+    (VmSafe.Wallet memory deployerWallet) = networkConfig.activeNetworkConfig();
 
-    VmSafe.Wallet memory deployerWallet = vm.createWallet(deployerPrivateKey);
+    vm.startBroadcast(deployerWallet.privateKey);
 
     MetaWeAccount accountImpl = new MetaWeAccount();
     MetaWeFollowNFT followNftImpl = new MetaWeFollowNFT();
@@ -28,5 +30,7 @@ contract Deploy is Script {
     ownership.transferOwnership(address(hub));
 
     vm.stopBroadcast();
+
+    return (accountImpl, followNftImpl, registry, ownership, hub);
   }
 }
