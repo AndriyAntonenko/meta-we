@@ -12,6 +12,8 @@ import { MetaWeAccount } from "../../src/MetaWeAccount.sol";
 import { MetaWeRegistry } from "../../src/MetaWeRegistry.sol";
 import { MetaWeOwnership } from "../../src/MetaWeOwnership.sol";
 import { MetaWeFollowNFT } from "../../src/MetaWeFollowNFT.sol";
+import { AccountsLib, FollowingLib } from "../../src/libraries/DataTypes.sol";
+import { IFollowNFT } from "../../src/interfaces/IFollowNFT.sol";
 
 contract MetaWeHubTest is Test {
   MetaWeHub public hub;
@@ -40,8 +42,8 @@ contract MetaWeHubTest is Test {
     vm.prank(user);
     (, address account) = hub.createAccount(nickname);
 
-    address followNFT = hub.getFollowNftAddress(account);
-    assertEq(MetaWeFollowNFT(followNFT).followee(), account);
+    IFollowNFT followNFT = hub.getFollowNftAddress(account);
+    assertEq(followNFT.followee(), account);
   }
 
   function test_follow() public {
@@ -58,8 +60,7 @@ contract MetaWeHubTest is Test {
     vm.prank(user);
     MetaWeAccount(payable(userAccount)).execute(address(hub), 0, data, IERC6551Executable.Op.CALL);
 
-    MetaWeFollowNFT.FollowingInfo[] memory followers =
-      MetaWeFollowNFT(hub.getFollowNftAddress(followeeAccount)).getFollowersList();
+    FollowingLib.FollowingInfo[] memory followers = hub.getFollowNftAddress(followeeAccount).getFollowersList();
 
     assertEq(followers.length, 1);
     assertEq(followers[0].follower, userAccount);
@@ -98,11 +99,10 @@ contract MetaWeHubTest is Test {
     vm.prank(user);
     MetaWeAccount(payable(userAccount)).execute(address(hub), 0, unfollowData, IERC6551Executable.Op.CALL);
 
-    MetaWeFollowNFT.FollowingInfo[] memory followers =
-      MetaWeFollowNFT(hub.getFollowNftAddress(followeeAccount)).getFollowersList();
+    FollowingLib.FollowingInfo[] memory followers = hub.getFollowNftAddress(followeeAccount).getFollowersList();
 
     assertEq(followers.length, 0);
-    assertEq(MetaWeFollowNFT(hub.getFollowNftAddress(followeeAccount)).getTokenIdByFollower(userAccount), 0);
+    assertEq(hub.getFollowNftAddress(followeeAccount).getTokenIdByFollower(userAccount), 0);
   }
 
   function test_getOwnedAccounts() public {
@@ -119,7 +119,7 @@ contract MetaWeHubTest is Test {
     vm.prank(otherUser);
     hub.createAccount("otherUser");
 
-    AccountsStorage.Account[] memory accounts = hub.getOwnedAccounts(user);
+    AccountsLib.Account[] memory accounts = hub.getOwnedAccounts(user);
     assertEq(accounts.length, 2);
   }
 }

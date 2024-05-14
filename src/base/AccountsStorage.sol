@@ -9,11 +9,6 @@ contract AccountsStorage {
   error AccountsStorage__AccountAlreadyExists(address account);
   error AccountsStorage__AccountDoesNotExist(address account);
 
-  struct Account {
-    uint256 tokenId;
-    address account;
-  }
-
   /// @dev Mapping of accounts addresses to tokenId.
   mapping(address => uint256) internal accountToTokenId;
 

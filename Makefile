@@ -35,8 +35,10 @@ slither :; slither . --config-file slither.config.json
 
 deploy-anvil :; forge script script/Deploy.s.sol \
 	--private-key ${DEFAULT_ANVIL_KEY} \
-	--rpc-url http://localhost:8545
+	--rpc-url http://localhost:8545 \
+	--broadcast
 
 deploy-sepolia :; forge script script/Deploy.s.sol \
 	--private-key ${SEPOLIA_DEPLOYER_PRIVATE_KEY} \
-	--rpc-url ${SEPOLIA_RPC_URL}
+	--rpc-url ${SEPOLIA_RPC_URL} \
+	--broadcast

@@ -5,10 +5,10 @@ import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { ERC721Enumerable } from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import { IERC721Metadata } from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { IOwnership } from "./interfaces/IOwnership.sol";
+import { Errors } from "./libraries/Errors.sol";
 
-contract MetaWeOwnership is ERC721, ERC721Enumerable, Ownable {
-  error MetaWeOwnership__IdentifierAlreadyExists(string);
-
+contract MetaWeOwnership is ERC721, ERC721Enumerable, Ownable, IOwnership {
   mapping(string => uint256) private s_identifierToTokenId;
 
   constructor(address _owner) ERC721("MetaWe Ownership", "MWO") Ownable(_owner) { }
@@ -19,20 +19,16 @@ contract MetaWeOwnership is ERC721, ERC721Enumerable, Ownable {
 
   modifier identifierNotExists(string calldata _identifier) {
     if (s_identifierToTokenId[_identifier] != 0) {
-      revert MetaWeOwnership__IdentifierAlreadyExists(_identifier);
+      revert Errors.MetaWeOwnership__IdentifierAlreadyExists(_identifier);
     }
     _;
   }
 
   /*//////////////////////////////////////////////////////////////
-                          EXTERNAL FUNCTIONS
+                      USER-FACING PUBLIC METHODS
   //////////////////////////////////////////////////////////////*/
 
-  /// @notice mint a new ownership token to `_to` with identifier `_identifier`
-  /// @dev this token will be used to control the ERC-6551 account
-  /// @param _to the address to mint the token to
-  /// @param _identifier the identifier of the token
-  /// @return the token ID
+  /// @inheritdoc IOwnership
   function mint(
     address _to,
     string calldata _identifier
@@ -49,22 +45,20 @@ contract MetaWeOwnership is ERC721, ERC721Enumerable, Ownable {
   }
 
   /*//////////////////////////////////////////////////////////////
-                            VIEW FUNCTIONS
+                      USER-FACING READ METHODS
   //////////////////////////////////////////////////////////////*/
 
+  /// @inheritdoc IOwnership
   function nextTokenId() public view returns (uint256) {
     return totalSupply() + 1;
   }
 
+  /// @inheritdoc IOwnership
   function getTokenIdByIdentifier(string calldata _identifier) external view returns (uint256) {
     return s_identifierToTokenId[_identifier];
   }
 
-  /*//////////////////////////////////////////////////////////////
-                          INTERNAL FUNCTIONS
-  //////////////////////////////////////////////////////////////*/
-
-  /// @notice this function allows to receive all tokens for a specific owner
+  /// @inheritdoc IOwnership
   function getOwnedTokenIds(address _owner) external view onlyOwner returns (uint256[] memory) {
     uint256 balance = balanceOf(_owner);
     uint256[] memory tokenIds = new uint256[](balance);
@@ -73,6 +67,10 @@ contract MetaWeOwnership is ERC721, ERC721Enumerable, Ownable {
     }
     return tokenIds;
   }
+
+  /*//////////////////////////////////////////////////////////////
+                          REQUIRED OVERRIDES
+  //////////////////////////////////////////////////////////////*/
 
   function _update(
     address to,

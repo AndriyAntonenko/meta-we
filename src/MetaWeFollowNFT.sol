@@ -9,6 +9,8 @@ import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/O
 import { MetaWeAccount } from "./MetaWeAccount.sol";
 import { MetaWeOwnership } from "./MetaWeOwnership.sol";
 import { IFollowNFT } from "./interfaces/IFollowNFT.sol";
+import { FollowingLib } from "./libraries/DataTypes.sol";
+import { Errors } from "./libraries/Errors.sol";
 
 /// @title MetaWeFollowNFT
 /// @notice NFT for following to followee.
@@ -24,7 +26,7 @@ contract MetaWeFollowNFT is ERC721Upgradeable, OwnableUpgradeable, IFollowNFT {
   //////////////////////////////////////////////////////////////*/
   mapping(address => uint256) private s_tokenIdByFollower;
   mapping(address => uint256) private s_followersIndexes;
-  FollowingInfo[] private s_followers;
+  FollowingLib.FollowingInfo[] private s_followers;
 
   function initialize(address _followee, address _hub, string memory _nickname) external initializer {
     __Ownable_init(_hub);
@@ -38,7 +40,7 @@ contract MetaWeFollowNFT is ERC721Upgradeable, OwnableUpgradeable, IFollowNFT {
 
   modifier notFollowed(address _follower) {
     if (s_tokenIdByFollower[_follower] != 0) {
-      revert FollowNFT__AlreadyFollowing(_follower);
+      revert Errors.FollowNFT__AlreadyFollowing(_follower);
     }
     _;
   }
@@ -46,17 +48,16 @@ contract MetaWeFollowNFT is ERC721Upgradeable, OwnableUpgradeable, IFollowNFT {
   modifier onlyFollower(address _follower) {
     //slither-disable-next-line incorrect-equality
     if (s_tokenIdByFollower[_follower] == 0) {
-      revert FollowNFT__NotFollowing(_follower);
+      revert Errors.FollowNFT__NotFollowing(_follower);
     }
     _;
   }
 
   /*//////////////////////////////////////////////////////////////
-                                LOGIC
+                      USER-FACING PUBLIC METHODS
   //////////////////////////////////////////////////////////////*/
 
-  /// @dev Mint NFT for follower to follow followee.
-  /// @param _follower Follower address
+  /// @inheritdoc IFollowNFT
   function follow(address _follower) external onlyOwner notFollowed(_follower) {
     uint256 tokenId = nextTokenId();
     _mint(_follower, tokenId);
@@ -64,14 +65,14 @@ contract MetaWeFollowNFT is ERC721Upgradeable, OwnableUpgradeable, IFollowNFT {
     s_tokenIdByFollower[_follower] = tokenId;
     s_followersIndexes[_follower] = s_followers.length;
 
-    FollowingInfo memory _followerInfo = FollowingInfo({ follower: _follower, timestamp: block.timestamp });
+    FollowingLib.FollowingInfo memory _followerInfo =
+      FollowingLib.FollowingInfo({ follower: _follower, timestamp: block.timestamp });
     s_followers.push(_followerInfo);
 
     emit Follow(_follower, tokenId, block.timestamp);
   }
 
-  /// @dev Burn NFT for follower to unfollow followee.
-  /// @param _follower Follower address
+  /// @inheritdoc IFollowNFT
   function unfollow(address _follower) external onlyOwner onlyFollower(_follower) {
     uint256 tokenId = s_tokenIdByFollower[_follower];
     _burn(tokenId);
@@ -91,26 +92,26 @@ contract MetaWeFollowNFT is ERC721Upgradeable, OwnableUpgradeable, IFollowNFT {
   }
 
   /*//////////////////////////////////////////////////////////////
-                            VIEW FUNCTIONS
+                      USER-FACING READ METHODS
   //////////////////////////////////////////////////////////////*/
 
-  /// @dev Return the next ERC721 token ID for follower.
+  /// @inheritdoc IFollowNFT
   function nextTokenId() public view returns (uint256) {
     return s_followers.length + 1;
   }
 
-  /// @dev Return the ERC721 token ID for follower.
+  /// @inheritdoc IFollowNFT
   function getTokenIdByFollower(address _follower) external view returns (uint256) {
     return s_tokenIdByFollower[_follower];
   }
 
-  /// @dev Return the address of the contract followee.
+  /// @inheritdoc IFollowNFT
   function followee() external view returns (address) {
     return i_followee;
   }
 
-  /// @dev Return the list of followers for followee.
-  function getFollowersList() external view returns (FollowingInfo[] memory) {
+  /// @inheritdoc IFollowNFT
+  function getFollowersList() external view returns (FollowingLib.FollowingInfo[] memory) {
     return s_followers;
   }
 }

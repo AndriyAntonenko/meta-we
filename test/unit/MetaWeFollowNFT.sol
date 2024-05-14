@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import { Test } from "forge-std/Test.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { MetaWeFollowNFT } from "../../src/MetaWeFollowNFT.sol";
-import { IFollowNFT } from "../../src/interfaces/IFollowNFT.sol";
+import { Errors } from "../../src/libraries/Errors.sol";
 
 contract MetaWeFollowNFTTest is Test {
   event Follow(address indexed follower, uint256 tokenId, uint256 timestamp);
@@ -48,7 +48,7 @@ contract MetaWeFollowNFTTest is Test {
     followNFT.follow(follower);
     vm.prank(hub);
 
-    vm.expectRevert(abi.encodeWithSelector(IFollowNFT.FollowNFT__AlreadyFollowing.selector, follower));
+    vm.expectRevert(abi.encodeWithSelector(Errors.FollowNFT__AlreadyFollowing.selector, follower));
     followNFT.follow(follower);
   }
 
@@ -59,15 +59,15 @@ contract MetaWeFollowNFTTest is Test {
     assertEq(followNFT.getTokenIdByFollower(follower), expectedTokenId);
   }
 
-  function test_folowee() public {
+  function test_folowee() public view {
     assertEq(followNFT.followee(), folowee);
   }
 
-  function test_nameIsCorrect() public {
+  function test_nameIsCorrect() public view {
     assertEq(followNFT.name(), string(abi.encodePacked("MetaWe-Follow-NFT-", nickname)));
   }
 
-  function test_symbolIsCorrect() public {
+  function test_symbolIsCorrect() public view {
     assertEq(followNFT.symbol(), string(abi.encodePacked("MWF-", nickname)));
   }
 
@@ -125,7 +125,7 @@ contract MetaWeFollowNFTTest is Test {
     vm.prank(hub);
     followNFT.unfollow(follower);
 
-    vm.expectRevert(abi.encodeWithSelector(IFollowNFT.FollowNFT__NotFollowing.selector, follower));
+    vm.expectRevert(abi.encodeWithSelector(Errors.FollowNFT__NotFollowing.selector, follower));
     vm.prank(hub);
     followNFT.unfollow(follower);
   }
