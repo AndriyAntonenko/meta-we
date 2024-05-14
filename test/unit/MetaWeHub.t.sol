@@ -110,10 +110,10 @@ contract MetaWeHubTest is Test {
     string memory nickname2 = "nickname2";
 
     vm.prank(user);
-    hub.createAccount(nickname1);
+    (uint256 tokenId1,) = hub.createAccount(nickname1);
 
     vm.prank(user);
-    hub.createAccount(nickname2);
+    (uint256 tokenId2,) = hub.createAccount(nickname2);
 
     address otherUser = makeAddr("otherUser");
     vm.prank(otherUser);
@@ -121,5 +121,7 @@ contract MetaWeHubTest is Test {
 
     AccountsLib.Account[] memory accounts = hub.getOwnedAccounts(user);
     assertEq(accounts.length, 2);
+    assertEq(tokenId1, accounts[0].tokenId);
+    assertEq(tokenId2, accounts[1].tokenId);
   }
 }
