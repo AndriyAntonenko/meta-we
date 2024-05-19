@@ -15,4 +15,12 @@ library Errors {
   //////////////////////////////////////////////////////////////*/
 
   error MetaWeOwnership__IdentifierAlreadyExists(string);
+
+  /*//////////////////////////////////////////////////////////////
+                          ACCOUNTS STORAGE
+  //////////////////////////////////////////////////////////////*/
+
+  error AccountsStorage__AccountAlreadyExists(address account);
+
+  error AccountsStorage__AccountDoesNotExist(address account);
 }
