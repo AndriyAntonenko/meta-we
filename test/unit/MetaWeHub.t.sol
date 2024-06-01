@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import { Test } from "forge-std/Test.sol";
 
 import { Deploy } from "../../script/Deploy.s.sol";
-import { AccountsStorage } from "../../src/base/AccountsStorage.sol";
+import { Errors } from "../../src/libraries/Errors.sol";
 import { IERC6551Executable } from "../../src/erc-6551/IERC6551Executable.sol";
 import { MetaWeHub } from "../../src/MetaWeHub.sol";
 import { MetaWeFollowNFT } from "../../src/MetaWeFollowNFT.sol";
@@ -74,9 +74,7 @@ contract MetaWeHubTest is Test {
 
     address nonAccountUser = makeAddr("nonAccountUser");
     vm.startPrank(nonAccountUser);
-    vm.expectRevert(
-      abi.encodeWithSelector(AccountsStorage.AccountsStorage__AccountDoesNotExist.selector, nonAccountUser)
-    );
+    vm.expectRevert(abi.encodeWithSelector(Errors.AccountsStorage__AccountDoesNotExist.selector, nonAccountUser));
     hub.follow(followeeAccount);
     vm.stopPrank();
   }

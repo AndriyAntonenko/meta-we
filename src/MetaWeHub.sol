@@ -91,6 +91,7 @@ contract MetaWeHub is AccountsStorage, IMetaWeHub {
 
   /// @inheritdoc IMetaWeHub
   function getOwnedAccounts(address owner) external view returns (AccountsLib.Account[] memory) {
+    if (i_ownership.balanceOf(owner) == 0) return new AccountsLib.Account[](0);
     uint256[] memory tokenIds = i_ownership.getOwnedTokenIds(owner);
     AccountsLib.Account[] memory accounts = new AccountsLib.Account[](tokenIds.length);
     for (uint256 i = 0; i < tokenIds.length; i++) {

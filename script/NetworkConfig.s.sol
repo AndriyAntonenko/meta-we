@@ -7,7 +7,7 @@ import { VmSafe } from "forge-std/Vm.sol";
 contract NetworkConfig is Script {
   Config public activeNetworkConfig;
 
-  uint256 public constant ANVIL_FIRST_PK = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
+  uint256 public constant ERIGON_DEV_CHAIN_FIRST_PK = 0x26e86e45f6fc45ec6e2ecd128cec80fa1d1505e5507dcd2ae58c3130a7a97b48;
 
   struct Config {
     VmSafe.Wallet deployer;
@@ -17,7 +17,7 @@ contract NetworkConfig is Script {
     if (block.chainid == 11_155_111) {
       activeNetworkConfig = getSepoliaConfig();
     } else {
-      activeNetworkConfig = getAnvilConfig();
+      activeNetworkConfig = getErgionDevChainConfig();
     }
   }
 
@@ -28,8 +28,8 @@ contract NetworkConfig is Script {
     return Config({ deployer: deployerWallet });
   }
 
-  function getAnvilConfig() public returns (Config memory) {
-    VmSafe.Wallet memory deployerWallet = vm.createWallet(ANVIL_FIRST_PK);
+  function getErgionDevChainConfig() public returns (Config memory) {
+    VmSafe.Wallet memory deployerWallet = vm.createWallet(ERIGON_DEV_CHAIN_FIRST_PK);
     return Config({ deployer: deployerWallet });
   }
 }

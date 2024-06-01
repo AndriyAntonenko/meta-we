@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+  erigon:
+    image: thorax/erigon:2.28.1-arm64
+    restart: on-failure:10
+    command: |
+      --http 
+      --http.api=eth,erigon,web3,net,debug,trace 
+      --http.corsdomain=*
+      --http.addr 0.0.0.0 
+      --http.port 8545
+      --http.vhosts=*
+      --chain dev 
+      --mine
+      --datadir /erigon
+    ports: ["8545:8545"]
+    volumes:
+      - ./data/erigon:/erigon
+    mem_swappiness: 0
